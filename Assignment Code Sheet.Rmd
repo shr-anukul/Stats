@@ -1,0 +1,670 @@
+---
+title: "Statistics Asignmnent "
+---
+
+```{r}
+library(ggplot2)
+library(visdat)
+library(dplyr)
+```
+```{r}
+theme_set(theme_light())
+```
+
+#Upload CSV File 
+```{r}
+data = read.csv("/Users/kule/Documents/Softwarica/Statistics/Assignment /customer_shopping_data_1695379411426.csv")
+```
+
+#Check dataset 
+```{r}
+head(data)
+```
+#Check for missing data
+```{r}
+tail(data)
+```
+```{r}
+summary(data)
+```
+#Check for missing values 
+
+```{r}
+missing_val <- colSums(is.na(data))
+print(missing_val)
+```
+#Dropping colummn customer_id
+```{r}
+data <- data[, -which(names(data) == "customer_id")]
+```
+
+#Check and print the unique values in each colummn
+
+```{r}
+gender_unique <- unique(data$gender)
+print(gender_unique)
+
+category_unique <- unique(data$category)
+print(category_unique)
+
+pmnt_method_unique <- unique(data$payment_method)
+print(pmnt_method_unique)
+
+shopping_mall_unique <- unique(data$shopping_mall)
+print(shopping_mall_unique)
+```
+#Conversion of dataset elements into numerical values
+```{r}
+# Convert gender data to numerical values
+data$gender <- as.numeric(factor(data$gender, levels = unique(data$gender)))
+
+# Convert category data to numerical values
+data$category <- as.numeric(factor(data$category, levels = unique(data$category)))
+
+# Convert payment_method data to numerical values
+data$payment_method <- as.numeric(factor(data$payment_method, levels = unique(data$payment_method)))
+
+# Convert shopping_mall data to numerical values
+data$shopping_mall <- as.numeric(factor(data$shopping_mall, levels = unique(data$shopping_mall)))
+```
+
+#______Task-1_______
+
+# Task 1.1 
+
+#Putting values of x in dataset
+```{r}
+x <- data[, !(names(data) %in% c("invoice_no", "quantity", "invoice_date", "gender", "shopping_mall"))]
+```
+
+#Conversion of invoice_date to date format
+```{r}
+#Conversion into DD/MM/YYYY
+data$invoice_date <- as.Date(data$invoice_date, format= "%d/%m/%Y")
+
+#Creating time series with frequency (Based on data is assumed monthly)
+data_ts <- ts(x, 
+              start = c(as.numeric(format(min(data$invoice_date), "%Y")), 
+                        as.numeric(format(min(data$invoice_date), "%m"))), 
+              end = c(as.numeric(format(max(data$invoice_date), "%Y")), 
+                        as.numeric(format(max(data$invoice_date), "%m"))),
+              frequency = 12)
+
+# Set the size of the plot
+par(plt.height = 5, plt.width = 10)
+
+# Create the time series plot
+plot(data_ts, main = "Time series plot", xlab = "Date of Invoice", ylab = "X - Inputs", col = "grey")
+
+```
+
+#Plotting time series of Output value(y)
+```{r}
+#Conversion into DD/MM/YYYY
+data$invoice_date <- as.Date(data$invoice_date, format= "%d/%m/%Y")
+
+#Creating time series with frequency (Based on data is assumed monthly)
+data_ts <- ts(data$quantity, 
+              start = c(as.numeric(format(min(data$invoice_date), "%Y")), 
+                        as.numeric(format(min(data$invoice_date), "%m"))), 
+              end = c(as.numeric(format(max(data$invoice_date), "%Y")), 
+                        as.numeric(format(max(data$invoice_date), "%m"))),
+              frequency = 12)
+
+plot(data_ts, main = "Time series Output(y)", xlab = "Date of Invoice", ylab = "Total Quantity", col = "grey")
+```
+
+```{r}
+head(data)
+```
+
+#Task 1. 2
+
+#Distribution of each sales data 
+```{r}
+dist_sales = density(x$age)
+
+#Histogram of X inputs 
+hist(x$age,freq = FALSE, main = "Age - Histogram and Plot of Age", col ="lightblue")
+
+#Density addition in the histogram
+lines(dist_sales, lwd = 3, col="black")
+rug(jitter(x$age))
+      
+```
+```{r}
+dis_cat = density(x$category)
+plot(dis_cat,main = "Density of whole inputs")
+
+#Histogram of X inputs 
+hist(x$category,freq = FALSE, main = "Category - Histogram and Plot", col ="lightblue")
+
+#Density addition in the histogram
+lines(dis_cat, lwd = 3, col="black")
+rug(jitter(x$category))
+```
+```{r}
+dis_quant = density(data$quantity)
+plot(dis_quant, main = "Density plot of whole inputs")
+
+#Creating histogram of X Inputs
+hist(data$quantity, freq =FALSE, main = "Histogram and density plot of Quantity", col = "lightblue")
+
+#Density addition in the histogram
+lines(dis_quant, lwd = 3, col = "black")
+rug(jitter(x$quantity))
+```
+```{r}
+dis_cat = density(x$price)
+plot(dis_cat,main = "Density of whole inputs")
+
+#Histogram of X inputs 
+hist(x$price,freq = FALSE, main = "Price - Histogram and Plot", col ="lightblue")
+
+#Density addition in the histogram
+lines(dis_cat, lwd = 3, col="black")
+rug(jitter(x$price))
+```
+
+
+#_____Task-1.3_____
+
+#Correlation and Scatter Plots 
+
+```{r}
+# Plotting age against quantity 
+Y <- data$quantity
+plot(data$age, Y, main = "Correlation between Age and Quantity", xlab = "age", ylab = "quantity")
+
+# Plotting price against quantity 
+plot(data$price, Y, main = "Correlation between Price and Quantity", xlab = "price", ylab = "quantity")
+
+# Plotting category against quantity 
+plot(data$category, Y, main = "Correlation between Category and Quantity", xlab = "category", ylab = "quantity")
+
+# Plotting payment_method against quantity 
+plot(data$payment_method, Y, main = "Correlation between Payment Method and Quantity", xlab = "payment_method", ylab = "quantity")
+```
+
+```{r}
+# Select the variables you want for the pairwise scatterplot
+variables_to_plot <- data[, c("age", "price", "category", "payment_method", "quantity")]
+
+# Create pairwise scatterplots
+pairs(variables_to_plot, main = "Pairwise Scatter Plot", pch = 19, col = "grey")
+
+```
+
+#_____Task-2_____
+
+# Task 2.1
+#Estimating the model parameters using least squares
+
+```{r}
+y <- as.matrix(data$quantity)
+print(y)
+```
+
+```{r}
+data_df <- data.frame(
+  x1 = data[, "age"],
+  x2 = data[, "category"],
+  x3 = data[, "price"],
+  x4 = data[, "payment_method"],
+  y = data[, "quantity"]
+)
+
+data_df[1:5]
+```
+
+#Given thetaHat model
+```{r}
+thetaHat <- function(model, y){
+  return(solve(t(model) %*% model) %*% t(model) %*% y)}
+```
+
+#Entering the models given 
+```{r}
+model_1 <- lm(y ~ poly(x4, 1, raw = TRUE) + poly(x1, 2, raw = TRUE) + poly(x1, 3, raw = TRUE) +
+               poly(x2, 4, raw = TRUE) + poly(x1, 4, raw = TRUE), data = data_df)
+
+model_2 <- lm(y ~ poly(x4, 1, raw = TRUE) + poly(x1, 3, raw = TRUE) + poly(x3, 4, raw = TRUE), data = data_df)
+
+model_3 <- lm(y ~ poly(x3, 3, raw = TRUE) + poly(x3, 4, raw = TRUE), data = data_df)
+
+model_4 <- lm(y ~ poly(x2, 1, raw = TRUE) + poly(x1, 3, raw = TRUE) + poly(x3, 4, raw = TRUE), data = data_df)
+
+model_5 <- lm(y ~ poly(x4, 1, raw = TRUE) + poly(x1, 2, raw = TRUE) + poly(x1, 3, raw = TRUE) +
+               poly(x3, 4, raw = TRUE), data = data_df)
+
+```
+
+```{r}
+# Create a list to store estimated coefficients for each model
+
+options(scipen = 999)
+
+est_parameters_list <- list(
+  Model1 = coef(model_1),
+  Model2 = coef(model_2), 
+  Model3 = coef(model_3), 
+  Model4 = coef(model_4), 
+  Model5 = coef(model_5)
+)
+
+# Create a data frame to store coefficients
+coefficients_df <- data.frame(
+  Model = character(0),
+  θ1 = numeric(0),
+  θ2 = numeric(0),
+  θ3 = numeric(0),
+  θ4 = numeric(0),
+  θbias = numeric(0)
+)
+
+# Extract and organize coefficients for each model
+for (model_name in names(est_parameters_list)) {
+  parameters <- est_parameters_list[[model_name]]
+  coefficients <- parameters[1:5]  # Extract relevant coefficients
+  
+  # Add coefficients to the DataFrame
+  coefficients_df <- rbind(coefficients_df, cbind(Model = model_name, coefficients))
+}
+
+# Display the coefficient values
+cat("Coefficients for each model are:\n")
+print(coefficients_df)
+```
+
+z
+```{r}
+options(scipen = 999)
+est_parameters_list
+```
+
+```{r}
+print(est_parameters_list$Model1)
+```
+
+#_____Task2.2_____
+
+#Calculating RSS values 
+```{r}
+rss <- c(
+  sum(model_1$residuals^2),
+  sum(model_2$residuals^2),
+  sum(model_3$residuals^2),
+  sum(model_4$residuals^2),
+  sum(model_5$residuals^2)
+)
+
+# Create a data frame to store the RSS for each model
+rss_df <- data.frame(
+  Model = c("Model 1", "Model 2", "Model 3", "Model 4", "Model 5"),
+  RSS = rss
+)
+
+# Print the RSS for each model
+cat("rss value for each model is \n")
+print(rss_df)
+```
+
+#Task 2.3 
+
+#Calculating log likelihood function
+```{r}
+calc_log_likelihood <- function(model) {
+  n <- length(model$residuals)
+  sigma_sq <- sum(model$residuals^2) / (n - length(model$coefficients))
+  log_likelihood <- -n/2 * log(2 * pi * sigma_sq) - sum(model$residuals^2) / (2 * sigma_sq)
+  return(log_likelihood)
+}
+```
+
+```{r}
+log_likelihood_values <- c(
+  calc_log_likelihood(model1),
+  calc_log_likelihood(model2),
+  calc_log_likelihood(model3),
+  calc_log_likelihood(model4),
+  calc_log_likelihood(model5)
+)
+```
+```{r}
+log_likelihood_df <- data.frame(
+  Model = c("Model 1", "Model 2", "Model 3", "Model 4", "Model 5"),
+  LogLikelihood = log_likelihood_values
+)
+print(log_likelihood_df)
+```
+
+#Task 2.4 
+
+#Computing Akaike Information Criterion (AIC) 
+```{r}
+aic_value <- c(
+  AIC(model_1),
+  AIC(model_2),
+  AIC(model_3),
+  AIC(model_4),
+  AIC(model_5)
+)
+
+aic_df <- data.frame(
+  Model = c("Model 1", "Model 2", "Model 3", "Model 4", "Model 5"),
+  AIC = aic_value
+)
+aic_df
+```
+
+# Computing Bayesian Information Criterion (BIC)
+```{r}
+bic_value <- c(
+  BIC(model_1),
+  BIC(model_2),
+  BIC(model_3),
+  BIC(model_4),
+  BIC(model_5)
+)
+```
+
+```{r}
+bic_df <- data.frame(
+  Model = c("Model 1", "Model 2", "Model 3", "Model 4", "Model 5"),
+  BIC = bic_value
+)
+bic_df
+```
+#Task 2.5 
+
+```{r}
+prediction1 <- predict(model1)
+prediction2 <- predict(model2)
+prediction3 <- predict(model3)
+prediction4 <- predict(model4)
+prediction5 <- predict(model5)
+```
+
+```{r}
+error1 <- data_df$y - prediction1
+error2 <- data_df$y - prediction2
+error3 <- data_df$y - prediction3
+error4 <- data_df$y - prediction4
+error5 <- data_df$y - prediction5
+```
+
+```{r}
+error_list <- list(error1, error2, error3, error4, error5)
+```
+
+```{r}
+plot_qq <- function(errors, model_name) {
+  qqnorm(errors, main = paste("Q-Q Plot", model_name))
+  qqline(errors, col = "blue")
+}
+```
+
+```{r}
+layout(matrix(1:5, nrow = 1))
+```
+
+```{r}
+for (i in 1:5) {
+  plot_qq(error_list[[i]], model_name = paste("Model", i))
+}
+```
+#Calculating the mean of errors of all models 
+```{r}
+mean_error <- c(mean(error1),mean(error2), mean(error3), mean(error4), mean(error5))
+```
+
+#Create table for all
+```{r}
+table_all <- data.frame(
+  Model = paste("Model", 1:5), 
+  Mean_error = mean_error, 
+  AIC = aic_value, 
+  BIC = bic_value
+)
+
+print(table_all)
+```
+
+#Task 2.6 
+#In this case, Model 4 still appears to have the lowest BIC value (333381.7), which suggests it has the best balance of model fit and complexity according to the BIC criterion. However, the choice between AIC and BIC may also depend on your specific goals and the trade-offs you are willing to make regarding model complexity. It's common to consider both AIC and BIC and make a decision based on both criteria and other relevant factors in your analysis.
+
+#Task 2.7
+
+#Splitting the dataset into training and testing (70-30% ratio)
+```{r}
+train_index <- sample(1:nrow(data_df), 0.7 * nrow(data_df))
+train_data <- data_df[train_index, ]
+test_data <- data_df[-train_index, ]
+```
+```{r}
+#Fitting the best model using training data
+best_model <- lm(y ~ poly(x2, 1, raw = TRUE) + poly(x1, 3, raw = TRUE) + poly(x3, 4, raw = TRUE), data = data_df)
+```
+```{r}
+#Predictions from testing data 
+predictions <- predict(best_model, newdata = test_data, interval = "prediction", level = 0.95)
+```
+
+#Create dataframe to store data 
+```{r}
+results <- data.frame(
+  x1 = test_data$x1,
+  x2 = test_data$x2,
+  x3 = test_data$x3,
+  y_true = test_data$y,
+  y_pred = predictions[, 1],  # Predicted values
+  lower_bound = predictions[, 2],  # Lower bound of the prediction interval
+  upper_bound = predictions[, 3]   # Upper bound of the prediction interval
+)
+
+plot(results)
+```
+```{r}
+#Creating a scatter plot with prediction intervals
+ggplot(results, aes(x = x1, y = y_true)) +
+  geom_point() +
+  geom_line(aes(x = x1, y = y_pred), color = "blue", size = 1) +
+  geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 1, color = "lightgrey", size = 0.01
+                ) +
+  ggtitle("Model 4: Testing Data vs. Predictions (95% Prediction Intervals)") +
+  xlab("Test") +
+  ylab("Prediction")
+
+```
+
+```{r}
+#Creating a scatter plot with prediction intervals
+ggplot(results, aes(x = x3, y = y_true)) +
+  geom_point() +
+  geom_line(aes(x = x3, y = y_pred), color = "blue", size = 1) +
+  geom_errorbar(aes(ymin = lower_bound, ymax = upper_bound), width = 1, color = "lightgrey", size = 0.01
+                ) +
+  ggtitle("Model 4: Testing Data vs. Predictions (95% Prediction Intervals)") +
+  xlab("Training") +
+  ylab("Total Sales Quantity")
+
+```
+
+#Task 3 
+
+#Task 3.1 
+
+```{r}
+numbers <- c(est_parameters_list$Model4)
+sorted_numbers <- sort(abs(numbers), decreasing=TRUE)
+largest_two_values <- sorted_numbers[1:2]
+
+# Choosing parameters
+theta_bias <- largest_two_values[1] 
+theta_four <- largest_two_values[2]
+
+# Constant parameters
+theta_one  <-  0.010038614  
+theta_three   <- -0.001912836
+
+# Initial values
+arr_1 <- 0
+arr_2 <- 0
+f_value <- 0
+s_value <- 0
+
+# Print the values
+print("Values:")
+print(paste("theta_bias: ", theta_bias))
+print(paste("theta_four: ", theta_four))
+print(paste("theta_one: ", theta_one))
+print(paste("theta_three: ", theta_three))
+
+# Create and print the table-like structure
+data_table <- data.frame(
+  Y = c(theta_bias, theta_four, theta_one, theta_three),
+  row.names = c("ones", "X4", "X1", "X3")
+)
+
+print("Table:")
+print(data_table)
+```
+
+Task 3.2 
+
+
+```{r}
+head(data_df)
+```
+
+```{r}
+# Load the library
+library(ggplot2)
+
+# Assuming data_df and rss_df$model_2 are already defined...
+
+# Fitting model_4
+model_4 <- lm(y ~ poly(x2, 1, raw = TRUE) + poly(x1, 3, raw = TRUE) + poly(x3, 4, raw = TRUE), data = data_df)
+
+# Extracting model matrix
+X_model_4 <- model.matrix(~ poly(x2, 1, raw = TRUE) + poly(x1, 3, raw = TRUE) + poly(x3, 4, raw = TRUE), data = data_df)
+
+# Extracting y values
+y <- data_df$y
+
+# Calculating epsilon 
+epsilon <- rss_df$model_2  * 2
+
+# Number of iteration 
+num <- 100 
+
+# Placeholder for storing f_values if they are generated during the iterations
+f_value <- numeric(num)
+s_value <- numeric(num) 
+
+# Calculating Y-hat for performing rejection ABC 
+counter <- 0
+
+# Iteration from 1 to num and calculating the range 
+for (i in 1:num) {
+  range1 <- runif(1,-2.434384398,2.434384398) 
+  range2 <- runif(1,-0.070726064,0.070726064)
+  
+  # Creating new vector of two values from range1 and range2 with the constant values theta_one,theta_three. 
+  New_thetahat <- matrix(c(range1, range2, theta_one, theta_three), nrow = length(coef(model_4)), ncol = 1)
+  
+  # Adding a tryCatch to handle potential errors in the matrix multiplication
+  tryCatch({
+    # Calculating predicted response values for the current iteration of the loop
+    New_Y_Hat <- X_model_4 %*% New_thetahat
+    
+    # Calculating new RSS value
+    new_RSS <- sum((y - New_Y_Hat)^2) 
+    
+    # Storing new_RSS as f_value
+    f_value[i] <- new_RSS
+    
+    # Check the condition
+    if (new_RSS > epsilon) {
+      s_value[counter + 1] <- range1 + range2
+      counter <- counter + 1
+    }
+  },
+  error = function(e) {
+    message("Error in iteration ", i, ": ", e$message)
+  })
+}
+
+# Shortening s_value to the actual number of items
+s_value <- s_value[1:counter]
+
+# Plotting code for f_value and s_value...
+
+# Additional code for plotting and visualization...
+
+
+# Check if f_value has meaningful data
+library(ggplot2)
+
+# Ensure that f_value contains meaningful data
+if(all(f_value <= 0)) {
+    warning("f_value must be strictly positive when applying the log transformation.")
+} else {
+    # Applying the logarithm transformation to f_value
+    log_f_value <- log(f_value)
+    
+    # Plotting the histogram
+    ggplot(data.frame(log_f_value), aes(x=log_f_value)) + 
+      geom_histogram(color = 'black', fill = "grey", bins = 30) + 
+      geom_rug() +
+      labs(title = "Frequency distribution of the log-transformed f_value",
+           x = "f(_value)", 
+           y = "Frequency") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) +
+      scale_x_continuous(labels = scales::number_format(accuracy = 1),
+                         breaks = scales::pretty_breaks(n = 10))
+}
+
+# Plotting the histogram for s_value
+if(all(is.na(s_value)) || all(s_value == 0)) {
+    warning("s_value does not contain meaningful data to plot.")
+} else {
+    # Plotting the histogram
+    ggplot(data.frame(s_value), aes(x=s_value)) + 
+      geom_histogram(color = 'black', fill = "grey", bins = 30) + 
+      geom_rug() +
+      labs(title = "Frequency distribution of the s_value") + 
+      xlab("s_value") + 
+      ylab("Frequency") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) +
+      scale_x_continuous(labels = scales::number_format(accuracy = 1),
+                         breaks = scales::pretty_breaks(n = 10))
+}
+
+```
+
+```{r}
+# ... [Your previous code] ...
+
+# Ensure that s_value contains meaningful data
+if(all(is.na(s_value)) || all(s_value == 0)) {
+    warning("s_value does not contain meaningful data to plot.")
+} else {
+    # Plotting the histogram
+    ggplot(data.frame(s_value), aes(x=s_value)) + 
+      geom_histogram(color = 'black', fill = "grey", bins = 30) + 
+      geom_rug() +
+      labs(title = "Frequency distribution of the s_value") + 
+      xlab("s_value") + 
+      ylab("Frequency") +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) +
+      scale_x_continuous(labels = scales::number_format(accuracy = 1),
+                         breaks = scales::pretty_breaks(n = 10))
+}
+
+```
+
+
+
+
+
